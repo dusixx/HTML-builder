@@ -1,5 +1,5 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+const fs = require('fs/promises');
+const path = require('path');
 
 const src = {
   STYLES: 'styles',
@@ -64,7 +64,7 @@ const createHTMLBundle = async (compsSrcPath, bundleName) => {
       templateStr = replaceTemplateTags(
         templateStr,
         path.parse(name).name,
-        compBuf.toString('utf-8')
+        compBuf.toString('utf-8'),
       );
     }
   }
@@ -98,17 +98,19 @@ const copyFolder = async (srcDir, dstDir) => {
 //------------------
 //
 
-// change current working dir
-process.chdir(import.meta.dirname);
+(async () => {
+  // change current working dir
+  process.chdir(__dirname);
 
-console.log(`\x1B[2JCreate ${dist.DIR}...`);
-await mkdir(dist.DIR);
+  console.log(`\x1B[2JCreate ${dist.DIR}...`);
+  await mkdir(dist.DIR);
 
-console.log(`\nCompile ${dist.DIR}/${dist.STYLES}...`);
-await createCSSBundle(src.STYLES, path.resolve(dist.DIR, dist.STYLES));
+  console.log(`\nCompile ${dist.DIR}/${dist.STYLES}...`);
+  await createCSSBundle(src.STYLES, path.resolve(dist.DIR, dist.STYLES));
 
-console.log(`\nCompile "${dist.DIR}/${dist.MARKUP}"...`);
-await createHTMLBundle(src.COMPS, path.resolve(dist.DIR, dist.MARKUP));
+  console.log(`\nCompile "${dist.DIR}/${dist.MARKUP}"...`);
+  await createHTMLBundle(src.COMPS, path.resolve(dist.DIR, dist.MARKUP));
 
-console.log(`\nCreate ${dist.DIR}/${src.ASSETS}...`);
-await copyFolder(src.ASSETS, path.join(dist.DIR, src.ASSETS));
+  console.log(`\nCreate ${dist.DIR}/${src.ASSETS}...`);
+  await copyFolder(src.ASSETS, path.join(dist.DIR, src.ASSETS));
+})();
