@@ -13,7 +13,7 @@ const bundle = {
   relPath: path.join(PROJECT_DIR, BUNDLE_NAME),
 };
 
-const createBundle = async () => {
+(async () => {
   // remove old bundle
   await fs.rm(bundle.path, { force: true });
 
@@ -33,6 +33,4 @@ const createBundle = async () => {
       stats.size / 1024
     ).toFixed(2)}kb`,
   );
-};
-
-createBundle();
+})();

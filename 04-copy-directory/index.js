@@ -7,7 +7,9 @@ const DST_DIR = 'files-copy';
 const srcPath = path.join(__dirname, SRC_DIR);
 const dstPath = path.join(__dirname, DST_DIR);
 
-const copyFiles = async () => {
+console.log('\x1B[2J');
+
+(async () => {
   await fs.rm(dstPath, { recursive: true, force: true });
   await fs.mkdir(dstPath, { recursive: true });
 
@@ -23,7 +25,4 @@ const copyFiles = async () => {
       await fs.copyFile(src, dst);
     }
   });
-};
-
-console.log(`\x1B[2J`);
-copyFiles();
+})();

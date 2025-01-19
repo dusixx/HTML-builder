@@ -4,7 +4,9 @@ const path = require('path');
 const TARGET_DIR = 'secret-folder';
 const targetPath = path.join(__dirname, TARGET_DIR);
 
-const listFiles = async () => {
+console.log(`\x1B[2J\nList of files in "${TARGET_DIR}":\n`);
+
+(async () => {
   const dirents = await fs.readdir(targetPath, { withFileTypes: true });
 
   dirents.forEach(async (ent) => {
@@ -19,7 +21,4 @@ const listFiles = async () => {
       );
     }
   });
-};
-
-console.log(`\x1B[2J\nList of files in "${TARGET_DIR}":\n`);
-listFiles();
+})();
