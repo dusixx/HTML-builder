@@ -13,9 +13,7 @@ console.log('\x1B[2J');
   await fs.rm(dstPath, { recursive: true, force: true });
   await fs.mkdir(dstPath, { recursive: true });
 
-  const dirents = await fs.readdir(srcPath, { withFileTypes: true });
-
-  dirents.forEach(async (ent) => {
+  for (const ent of await fs.readdir(srcPath, { withFileTypes: true })) {
     if (ent.isFile()) {
       const { name, parentPath } = ent;
       const src = path.resolve(parentPath, name);
@@ -24,5 +22,5 @@ console.log('\x1B[2J');
       console.log(`${SRC_DIR}/${name} -> ${DST_DIR}/${name}`);
       await fs.copyFile(src, dst);
     }
-  });
+  }
 })();
