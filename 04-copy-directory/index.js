@@ -7,13 +7,22 @@ const DST_DIR = 'files-copy';
 const srcPath = path.join(__dirname, SRC_DIR);
 const dstPath = path.join(__dirname, DST_DIR);
 
-console.log('\x1B[2J');
+const getDirents = async (path) => {
+  try {
+    return await fs.readdir(path, { withFileTypes: true });
+  } catch {}
+};
 
-(async () => {
+const copyFiles = async () => {
   await fs.rm(dstPath, { recursive: true, force: true });
+
+  const dirents = await getDirents(srcPath);
+  if (!dirents) {
+    return;
+  }
   await fs.mkdir(dstPath, { recursive: true });
 
-  for (const ent of await fs.readdir(srcPath, { withFileTypes: true })) {
+  for (const ent of dirents) {
     if (ent.isFile()) {
       const { name, parentPath } = ent;
       const src = path.resolve(parentPath, name);
@@ -22,5 +31,13 @@ console.log('\x1B[2J');
       console.log(`${SRC_DIR}/${name} -> ${DST_DIR}/${name}`);
       await fs.copyFile(src, dst);
     }
+  }
+};
+
+(async () => {
+  try {
+    await copyFiles();
+  } catch ({ message }) {
+    console.error(message);
   }
 })();

@@ -4,10 +4,18 @@ const path = require('path');
 const TARGET_DIR = 'secret-folder';
 const targetPath = path.join(__dirname, TARGET_DIR);
 
-console.log(`\x1B[2J\nList of files in "${TARGET_DIR}":\n`);
+const getDirents = async (path) => {
+  try {
+    return await fs.readdir(path, { withFileTypes: true });
+  } catch {}
+};
 
-(async () => {
-  for (const ent of await fs.readdir(targetPath, { withFileTypes: true })) {
+const listFiles = async () => {
+  const dirents = await getDirents(targetPath);
+  if (!dirents) {
+    return;
+  }
+  for (const ent of dirents) {
     if (ent.isFile()) {
       const { name, parentPath } = ent;
       const fileStats = await fs.stat(path.resolve(parentPath, name));
@@ -18,5 +26,13 @@ console.log(`\x1B[2J\nList of files in "${TARGET_DIR}":\n`);
         ).toFixed(2)}kb`,
       );
     }
+  }
+};
+
+(async () => {
+  try {
+    await listFiles();
+  } catch ({ message }) {
+    console.error(message);
   }
 })();

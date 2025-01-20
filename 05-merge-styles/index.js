@@ -13,24 +13,48 @@ const bundle = {
   relPath: path.join(PROJECT_DIR, BUNDLE_NAME),
 };
 
-(async () => {
+const getDirents = async (path) => {
+  try {
+    return await fs.readdir(path, { withFileTypes: true });
+  } catch {}
+};
+
+const createCSSBundle = async () => {
   // remove old bundle
   await fs.rm(bundle.path, { force: true });
 
-  for (const ent of await fs.readdir(srcPath, { withFileTypes: true })) {
+  const dirents = await getDirents(srcPath);
+  if (!dirents) {
+    return false;
+  }
+  for (const ent of dirents) {
     const { name, parentPath } = ent;
     // css files only
     if (ent.isFile() && /\.css$/i.test(name)) {
+      success = true;
       // append styles
       const buf = await fs.readFile(path.resolve(parentPath, name));
       await fs.writeFile(bundle.path, buf, { flag: 'a' });
     }
   }
-  // show stats
+  return true;
+};
+
+const showStats = async () => {
   const stats = await fs.stat(bundle.path);
   console.log(
     `\x1B[2JSuccessfully created!\nPath: .\\${bundle.relPath}\nSize: ${(
       stats.size / 1024
     ).toFixed(2)}kb`,
   );
+};
+
+(async () => {
+  try {
+    if (await createCSSBundle()) {
+      await showStats();
+    }
+  } catch ({ message }) {
+    console.error(message);
+  }
 })();

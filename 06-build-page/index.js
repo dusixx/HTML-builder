@@ -30,11 +30,21 @@ const replaceTemplateTags = (templateStr, tagName, content) => {
   return templateStr.replace(re, content);
 };
 
+const getDirents = async (path) => {
+  try {
+    return await fs.readdir(path, { withFileTypes: true });
+  } catch {}
+};
+
 const createCSSBundle = async (stylesSrcPath, bundleName) => {
   // remove old bundle
   await fs.rm(bundleName, { force: true });
 
-  for (const ent of await fs.readdir(stylesSrcPath, { withFileTypes: true })) {
+  const dirents = await getDirents(stylesSrcPath);
+  if (!dirents) {
+    return;
+  }
+  for (const ent of dirents) {
     const { name, parentPath } = ent;
     // css files only
     if (ent.isFile() && /\.css$/i.test(name)) {
@@ -53,7 +63,11 @@ const createHTMLBundle = async (compsSrcPath, bundleName) => {
   const templateBuf = await fs.readFile(path.resolve(src.TEMPLATE));
   let templateStr = templateBuf.toString('utf-8');
 
-  for (const ent of await fs.readdir(compsSrcPath, { withFileTypes: true })) {
+  const dirents = await getDirents(compsSrcPath);
+  if (!dirents) {
+    return;
+  }
+  for (const ent of dirents) {
     const { name, parentPath } = ent;
     // html files only
     if (ent.isFile() && /\.html$/i.test(name)) {
@@ -68,14 +82,18 @@ const createHTMLBundle = async (compsSrcPath, bundleName) => {
       );
     }
   }
-  // create html bundle
+  // create bundle
   await fs.writeFile(bundleName, templateStr);
 };
 
 const copyFolder = async (srcDir, dstDir) => {
   await mkdir(path.resolve(dstDir));
 
-  for (const ent of await fs.readdir(srcDir, { withFileTypes: true })) {
+  const dirents = await getDirents(srcDir);
+  if (!dirents) {
+    return;
+  }
+  for (const ent of dirents) {
     if (!ent.isFile() && !ent.isDirectory()) {
       continue;
     }
@@ -99,18 +117,22 @@ const copyFolder = async (srcDir, dstDir) => {
 //
 
 (async () => {
-  // change current working dir
-  process.chdir(__dirname);
+  try {
+    // change current working dir
+    process.chdir(__dirname);
 
-  console.log(`\x1B[2JCreate ${dist.DIR}...`);
-  await mkdir(dist.DIR);
+    console.log(`\x1B[2JCreate ${dist.DIR}...`);
+    await mkdir(dist.DIR);
 
-  console.log(`\nCompile ${dist.DIR}/${dist.STYLES}...`);
-  await createCSSBundle(src.STYLES, path.resolve(dist.DIR, dist.STYLES));
+    console.log(`\nCompile ${dist.DIR}/${dist.STYLES}...`);
+    await createCSSBundle(src.STYLES, path.resolve(dist.DIR, dist.STYLES));
 
-  console.log(`\nCompile "${dist.DIR}/${dist.MARKUP}"...`);
-  await createHTMLBundle(src.COMPS, path.resolve(dist.DIR, dist.MARKUP));
+    console.log(`\nCompile "${dist.DIR}/${dist.MARKUP}"...`);
+    await createHTMLBundle(src.COMPS, path.resolve(dist.DIR, dist.MARKUP));
 
-  console.log(`\nCreate ${dist.DIR}/${src.ASSETS}...`);
-  await copyFolder(src.ASSETS, path.join(dist.DIR, src.ASSETS));
+    console.log(`\nCreate ${dist.DIR}/${src.ASSETS}...`);
+    await copyFolder(src.ASSETS, path.join(dist.DIR, src.ASSETS));
+  } catch ({ message }) {
+    console.error(message);
+  }
 })();
