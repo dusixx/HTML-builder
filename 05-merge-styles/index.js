@@ -13,9 +13,9 @@ const bundle = {
   relPath: path.join(PROJECT_DIR, BUNDLE_NAME),
 };
 
-const getDirents = async (path) => {
+const getDirents = async (dirPath) => {
   try {
-    const dirents = await fs.readdir(path, { withFileTypes: true });
+    const dirents = await fs.readdir(dirPath, { withFileTypes: true });
     return dirents.length > 0 ? dirents : null;
   } catch {
     return null;
@@ -55,7 +55,7 @@ const showStats = async () => {
 (async () => {
   try {
     if (await createCSSBundle()) {
-      return await showStats();
+      await showStats();
     }
   } catch ({ message }) {
     console.error(message);

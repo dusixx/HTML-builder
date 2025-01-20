@@ -25,9 +25,9 @@ const replaceTemplateTags = (templateStr, tagName, content) => {
   return templateStr.replace(re, content);
 };
 
-const getDirents = async (path) => {
+const getDirents = async (dirPath) => {
   try {
-    const dirents = await fs.readdir(path, { withFileTypes: true });
+    const dirents = await fs.readdir(dirPath, { withFileTypes: true });
     return dirents.length > 0 ? dirents : null;
   } catch {
     return null;

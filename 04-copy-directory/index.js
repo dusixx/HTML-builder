@@ -7,9 +7,9 @@ const DST_DIR = 'files-copy';
 const srcPath = path.join(__dirname, SRC_DIR);
 const dstPath = path.join(__dirname, DST_DIR);
 
-const getDirents = async (path) => {
+const getDirents = async (dirPath) => {
   try {
-    const dirents = await fs.readdir(path, { withFileTypes: true });
+    const dirents = await fs.readdir(dirPath, { withFileTypes: true });
     return dirents.length > 0 ? dirents : null;
   } catch {
     return null;

@@ -4,9 +4,9 @@ const path = require('path');
 const TARGET_DIR = 'secret-folder';
 const targetPath = path.join(__dirname, TARGET_DIR);
 
-const getDirents = async (path) => {
+const getDirents = async (dirPath) => {
   try {
-    const dirents = await fs.readdir(path, { withFileTypes: true });
+    const dirents = await fs.readdir(dirPath, { withFileTypes: true });
     return dirents.length > 0 ? dirents : null;
   } catch {
     return null;
