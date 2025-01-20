@@ -7,9 +7,7 @@ const targetPath = path.join(__dirname, TARGET_DIR);
 console.log(`\x1B[2J\nList of files in "${TARGET_DIR}":\n`);
 
 (async () => {
-  const dirents = await fs.readdir(targetPath, { withFileTypes: true });
-
-  dirents.forEach(async (ent) => {
+  for (const ent of await fs.readdir(targetPath, { withFileTypes: true })) {
     if (ent.isFile()) {
       const { name, parentPath } = ent;
       const fileStats = await fs.stat(path.resolve(parentPath, name));
@@ -20,5 +18,5 @@ console.log(`\x1B[2J\nList of files in "${TARGET_DIR}":\n`);
         ).toFixed(2)}kb`,
       );
     }
-  });
+  }
 })();
