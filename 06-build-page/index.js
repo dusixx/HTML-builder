@@ -20,11 +20,6 @@ const dist = {
 //------------------
 //
 
-const mkdir = async (path) => {
-  await fs.rm(path, { recursive: true, force: true });
-  await fs.mkdir(path, { recursive: true });
-};
-
 const replaceTemplateTags = (templateStr, tagName, content) => {
   const re = new RegExp(`\\{\\{${tagName}\\}\\}`, 'gi');
   return templateStr.replace(re, content);
@@ -36,21 +31,34 @@ const getDirents = async (path) => {
   } catch {}
 };
 
+const readFile = async (filePath, enc = 'utf-8') => {
+  try {
+    const buf = await fs.readFile(filePath);
+    return {
+      buf,
+      str: buf.toString(enc),
+    };
+  } catch {
+    return '';
+  }
+};
+
 const createCSSBundle = async (stylesSrcPath, bundleName) => {
   // remove old bundle
   await fs.rm(bundleName, { force: true });
 
   const dirents = await getDirents(stylesSrcPath);
   if (!dirents) {
+    console.log('(nothing to compile)');
     return;
   }
   for (const ent of dirents) {
     const { name, parentPath } = ent;
     // css files only
-    if (ent.isFile() && /\.css$/i.test(name)) {
+    if (ent.isFile() && /^\.css$/i.test(path.extname(name))) {
       console.log(`+ ${src.STYLES}/${name}`);
       // append styles
-      const buf = await fs.readFile(path.resolve(parentPath, name));
+      const { buf } = await readFile(path.resolve(parentPath, name));
       await fs.writeFile(bundleName, buf, { flag: 'a' });
     }
   }
@@ -60,25 +68,28 @@ const createHTMLBundle = async (compsSrcPath, bundleName) => {
   // remove old bundle
   await fs.rm(bundleName, { force: true });
 
-  const templateBuf = await fs.readFile(path.resolve(src.TEMPLATE));
-  let templateStr = templateBuf.toString('utf-8');
-
   const dirents = await getDirents(compsSrcPath);
   if (!dirents) {
+    console.log('(nothing to compile)');
+    return;
+  }
+  let { str: templateStr } = await readFile(src.TEMPLATE);
+  if (!templateStr) {
+    console.log(`(${src.TEMPLATE} not found)`);
     return;
   }
   for (const ent of dirents) {
     const { name, parentPath } = ent;
     // html files only
-    if (ent.isFile() && /\.html$/i.test(name)) {
+    if (ent.isFile() && /^\.html$/i.test(path.extname(name))) {
       console.log(`+ ${src.COMPS}/${name}`);
 
-      const compBuf = await fs.readFile(path.resolve(parentPath, name));
+      const { str: compStr } = await readFile(path.resolve(parentPath, name));
 
       templateStr = replaceTemplateTags(
         templateStr,
         path.parse(name).name,
-        compBuf.toString('utf-8'),
+        compStr,
       );
     }
   }
@@ -87,12 +98,17 @@ const createHTMLBundle = async (compsSrcPath, bundleName) => {
 };
 
 const copyFolder = async (srcDir, dstDir) => {
-  await mkdir(path.resolve(dstDir));
+  // remove old
+  await fs.rm(dstDir, { recursive: true, force: true });
 
   const dirents = await getDirents(srcDir);
   if (!dirents) {
+    console.log('(nothing to copy)');
     return;
   }
+  // create new
+  await fs.mkdir(dstDir, { recursive: true });
+
   for (const ent of dirents) {
     if (!ent.isFile() && !ent.isDirectory()) {
       continue;
@@ -122,7 +138,8 @@ const copyFolder = async (srcDir, dstDir) => {
     process.chdir(__dirname);
 
     console.log(`\x1B[2JCreate ${dist.DIR}...`);
-    await mkdir(dist.DIR);
+    await fs.rm(dist.DIR, { recursive: true, force: true });
+    await fs.mkdir(dist.DIR, { recursive: true });
 
     console.log(`\nCompile ${dist.DIR}/${dist.STYLES}...`);
     await createCSSBundle(src.STYLES, path.resolve(dist.DIR, dist.STYLES));

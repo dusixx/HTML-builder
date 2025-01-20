@@ -18,6 +18,7 @@ const copyFiles = async () => {
 
   const dirents = await getDirents(srcPath);
   if (!dirents) {
+    console.log('(nothing to copy)');
     return;
   }
   await fs.mkdir(dstPath, { recursive: true });

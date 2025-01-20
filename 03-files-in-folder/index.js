@@ -10,28 +10,26 @@ const getDirents = async (path) => {
   } catch {}
 };
 
-const listFiles = async () => {
-  const dirents = await getDirents(targetPath);
+const listFiles = async (srcPath) => {
+  const dirents = await getDirents(srcPath);
   if (!dirents) {
+    console.log('(nothing to list)');
     return;
   }
   for (const ent of dirents) {
     if (ent.isFile()) {
       const { name, parentPath } = ent;
       const fileStats = await fs.stat(path.resolve(parentPath, name));
+      const ext = path.extname(name).slice(1) || '(no-ext)';
 
-      console.log(
-        `${name} - ${path.extname(name).slice(1)} - ${(
-          fileStats.size / 1024
-        ).toFixed(2)}kb`,
-      );
+      console.log(`${name} - ${ext} - ${(fileStats.size / 1024).toFixed(2)}kb`);
     }
   }
 };
 
 (async () => {
   try {
-    await listFiles();
+    await listFiles(targetPath);
   } catch ({ message }) {
     console.error(message);
   }

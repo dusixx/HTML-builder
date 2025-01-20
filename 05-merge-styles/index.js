@@ -25,13 +25,13 @@ const createCSSBundle = async () => {
 
   const dirents = await getDirents(srcPath);
   if (!dirents) {
+    console.log('(nothing to compile)');
     return false;
   }
   for (const ent of dirents) {
     const { name, parentPath } = ent;
     // css files only
-    if (ent.isFile() && /\.css$/i.test(name)) {
-      success = true;
+    if (ent.isFile() && /^\.css$/i.test(path.extname(name))) {
       // append styles
       const buf = await fs.readFile(path.resolve(parentPath, name));
       await fs.writeFile(bundle.path, buf, { flag: 'a' });
@@ -52,7 +52,7 @@ const showStats = async () => {
 (async () => {
   try {
     if (await createCSSBundle()) {
-      await showStats();
+      return await showStats();
     }
   } catch ({ message }) {
     console.error(message);
