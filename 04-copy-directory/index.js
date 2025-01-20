@@ -9,8 +9,11 @@ const dstPath = path.join(__dirname, DST_DIR);
 
 const getDirents = async (path) => {
   try {
-    return await fs.readdir(path, { withFileTypes: true });
-  } catch {}
+    const dirents = await fs.readdir(path, { withFileTypes: true });
+    return dirents.length > 0 ? dirents : null;
+  } catch {
+    return null;
+  }
 };
 
 const copyFiles = async () => {

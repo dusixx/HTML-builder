@@ -27,8 +27,11 @@ const replaceTemplateTags = (templateStr, tagName, content) => {
 
 const getDirents = async (path) => {
   try {
-    return await fs.readdir(path, { withFileTypes: true });
-  } catch {}
+    const dirents = await fs.readdir(path, { withFileTypes: true });
+    return dirents.length > 0 ? dirents : null;
+  } catch {
+    return null;
+  }
 };
 
 const readFile = async (filePath, enc = 'utf-8') => {
